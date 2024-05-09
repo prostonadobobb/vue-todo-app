@@ -1,13 +1,33 @@
+<script>
+  import todos from './data/todos.js';
+
+  export default {
+    data() {
+      return {
+        todos,
+      }
+    },
+    mounted() {
+      console.log(this.todos)
+    }, computed: {
+      activeTodos() {
+        return this.todos.filter(todo => !todo.completed)
+      }
+    }
+  }
+</script>
+
 <template>
   <div class="todoapp">
-    <h1 class="todoapp__title">TOOODDDOOOSSS</h1>
+    <h1 class="todoapp__title">Todos</h1>
 
     <div class="todoapp__content">
       <header class="todoapp__header">
         <button
           type="button"
-          class="todoapp__toggle-all active"
+          class="todoapp__toggle-all"
           data-cy="ToggleAllButton"
+          :class="{ active: activeTodos.length === 0 }"
         />
 
         <form>
@@ -21,53 +41,24 @@
       </header>
 
       <section class="todoapp__main" data-cy="TodoList">
-        <div data-cy="Todo" class="todo completed">
+
+        <div 
+          v-for="todo, index of todos" 
+          :key="todo.id"
+          data-cy="Todo"
+          class="todo"
+          :class="{ 'completed': todo.completed }"  
+        >
           <label class="todo__status-label">
             <input
               data-cy="TodoStatus"
               type="checkbox"
               class="todo__status"
-              checked
+              v-model="todo.completed"
             />
           </label>
-
-          <span data-cy="TodoTitle" class="todo__title">
-            Completed Todo
-          </span>
-
-          <button type="button" class="todo__remove" data-cy="TodoDelete">
-            ×
-          </button>
-        </div>
-
-        <div data-cy="Todo" class="todo">
-          <label class="todo__status-label">
-            <input
-              data-cy="TodoStatus"
-              type="checkbox"
-              class="todo__status"
-            />
-          </label>
-
-          <span data-cy="TodoTitle" class="todo__title">
-            Not Completed Todo
-          </span>
-
-          <button type="button" class="todo__remove" data-cy="TodoDelete">
-            ×
-          </button>
-        </div>
-
-        <div data-cy="Todo" class="todo">
-          <label class="todo__status-label">
-            <input
-              data-cy="TodoStatus"
-              type="checkbox"
-              class="todo__status"
-            />
-          </label>
-
-          <form>
+          
+          <form v-if="false">
             <input
               data-cy="TodoTitleField"
               type="text"
@@ -76,30 +67,30 @@
               value="Todo is being edited now"
             />
           </form>
+
+          <template v-else>
+            <span data-cy="TodoTitle" class="todo__title">
+              {{ todo.title }}
+            </span>
+
+            <button type="button" class="todo__remove" data-cy="TodoDelete"
+              @click="todos.splice(index, 1)"
+            >
+              ×
+            </button>
+          </template>
+
+          <div class="modal overlay" :class="{ 'is-active': false }">
+            <div class="modal-background has-background-white-ter"></div>
+            <div class="loader"></div>
+          </div>
         </div>
 
-        <div data-cy="Todo" class="todo">
-          <label class="todo__status-label">
-            <input
-              data-cy="TodoStatus"
-              type="checkbox"
-              class="todo__status"
-            />
-          </label>
-
-          <span data-cy="TodoTitle" class="todo__title">
-            Todo is being saved now
-          </span>
-
-          <button type="button" class="todo__remove" data-cy="TodoDelete">
-            ×
-          </button>
-        </div>
       </section>
 
       <footer class="todoapp__footer" data-cy="Footer">
         <span class="todo-count" data-cy="TodosCounter">
-          3 items left
+          {{ activeTodos.length }} items left
         </span>
 
         <nav class="filter" data-cy="Filter">
@@ -132,6 +123,7 @@
           type="button"
           class="todoapp__clear-completed"
           data-cy="ClearCompletedButton"
+          v-if="activeTodos.length > 0"
         >
           Clear completed
         </button>
